@@ -3,6 +3,7 @@ package com.example.awfulman.breakingnews;
 import android.app.Application;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * Created by AwfulMan on 26.09.16.

@@ -19,7 +19,7 @@ public class AddCategoryDialog extends DialogFragment {
     private ArrayList<Integer> mSelectedItems;
 
     public interface AddCategoryDialogListener{
-        public void onDialogPositiveClick(DialogFragment dialog, ArrayList<Category> values);
+        void onDialogPositiveClick(DialogFragment dialog, ArrayList<Category> values);
     }
 
     private AddCategoryDialogListener mListener;
@@ -72,6 +72,7 @@ public class AddCategoryDialog extends DialogFragment {
                 ArrayList<Category> newList = new ArrayList<>();
                 for (Integer selectedItem : mSelectedItems){
                     Category toAdd = new Category(allCats[selectedItem].toString());
+
                     toAdd.setSelected(true);
                     newList.add(toAdd);
                 }

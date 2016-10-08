@@ -8,6 +8,7 @@ import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.TextView;
 
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -53,7 +54,9 @@ public class CategoryAdapter extends ArrayAdapter<Category> {
 
     private Context context;
     private List<Category> categoryList;
-    private View.OnTouchListener mTouchListener;
+
+    HashMap<Category, Integer> mIdMap = new HashMap();
+    View.OnTouchListener mTouchListener;
 
     @Override
     public boolean areAllItemsEnabled()
@@ -67,37 +70,55 @@ public class CategoryAdapter extends ArrayAdapter<Category> {
         return true;
     }
 
-    public CategoryAdapter(List<Category> categoryList, Context context) {
+    public CategoryAdapter(List<Category> categoryList, Context context, View.OnTouchListener touchListener) {
         super(context,R.layout.single_list_item,categoryList);
         this.categoryList = categoryList;
         this.context = context;
+        mTouchListener = touchListener;
+        for (int i = 0; i < categoryList.size(); ++i) {
+            mIdMap.put(categoryList.get(i), i);
+        }
     }
 
     private static class CategoryHolder{
         public TextView cat;
         public TextView last_article;
-        public CheckBox chkBox;
     }
 
     public void UpdateCategoryList(List<Category> newlist) {
         categoryList.clear();
         categoryList.addAll(newlist);
+        for (int i = 0; i < categoryList.size(); ++i) {
+            mIdMap.put(categoryList.get(i), i);
+        }
         this.notifyDataSetChanged();
     }
 
     @Override
+    public long getItemId(int position) {
+        Category item = getItem(position);
+        return mIdMap.get(item);
+    }
+
+    @Override
+    public boolean hasStableIds() {
+        return true;
+    }
+
+    @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        View v = convertView;
+
         CategoryHolder catHold = new CategoryHolder();
 //        if (convertView == null){
             LayoutInflater infl = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            v = infl.inflate(R.layout.single_list_item, null);
+
+            View v = infl.inflate(R.layout.single_list_item, null);
+            v.setOnTouchListener(mTouchListener);
+
             catHold.cat = (TextView) v.findViewById(R.id.category);
             catHold.last_article = (TextView) v.findViewById(R.id.last_article);
-            catHold.chkBox = (CheckBox) v.findViewById(R.id.check_box);
 
             catHold.cat.setOnClickListener((MainActivity)context);
-            catHold.chkBox.setOnCheckedChangeListener((MainActivity)context);
         //convertView.setTag(catHold);
 //        }else{
 //            catHold = (CategoryHolder) v.getTag();
@@ -105,8 +126,6 @@ public class CategoryAdapter extends ArrayAdapter<Category> {
         Category c = categoryList.get(position);
         catHold.cat.setText(c.getCategory());
         catHold.last_article.setText(c.getLast_article());
-        catHold.chkBox.setChecked(c.isSelected());
-        catHold.chkBox.setTag(c);
         return v;
     }
 
