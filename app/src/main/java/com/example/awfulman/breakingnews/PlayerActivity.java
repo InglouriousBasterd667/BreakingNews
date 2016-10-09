@@ -210,23 +210,13 @@ public class PlayerActivity extends ListActivity {
                             startPlay(currentFile);
                         }
                     }
-
                     break;
                 }
                 case R.id.next: {
-//                    int seekto = player.getCurrentPosition() + STEP_VALUE;
-
-//                    if (seekto > player.getDuration())
-//                        seekto = player.getDuration();
-//
-//                    player.pause();
-//                    player.seekTo(seekto);
-//                    player.start();
                     Cursor cursor = mediaAdapter.getCursor();
                     if (cursor.isBeforeFirst())
                         cursor.moveToFirst();
                     cursor.moveToNext();
-
                     if (!cursor.isAfterLast())
                         startPlay(cursor.getString(
                                 cursor.getColumnIndex(MediaStore.MediaColumns.DATA)));

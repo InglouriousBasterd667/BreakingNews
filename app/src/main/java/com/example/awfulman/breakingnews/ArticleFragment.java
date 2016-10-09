@@ -5,6 +5,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -19,14 +20,16 @@ import android.widget.TextView;
  * Use the {@link ArticleFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class ArticleFragment extends Fragment {
+public class ArticleFragment extends Fragment implements View.OnTouchListener {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARTICLE = "article";
+    private static final float STEP = 200;
 
     // TODO: Rename and change types of parameters
     private Article article;
-
+    private TextView textView;
+    private float ratio = 1.0f;
     private OnFragmentInteractionListener mListener;
 
     public ArticleFragment() {
@@ -64,17 +67,48 @@ public class ArticleFragment extends Fragment {
 
         if (article != null) {
             TextView titleView = (TextView)v.findViewById(R.id.fragment_title);
-            TextView textView = (TextView)v.findViewById(R.id.fragment_text);
+            textView = (TextView)v.findViewById(R.id.fragment_text);
             ImageView imgView = (ImageView)v.findViewById(R.id.fragment_image);
 
             titleView.setText(article.getTitle());
             textView.setText(article.getText());
+            textView.setTextSize(13);
+            textView.setOnTouchListener(new View.OnTouchListener() {
+                public float mBaseRatio;
+                public int mBaseDist;
+
+                @Override
+                public boolean onTouch(View v, MotionEvent event) {
+                    if (event.getPointerCount() == 2) {
+                        int action = event.getAction();
+                        int pureaction = action & MotionEvent.ACTION_MASK;
+                        
+                        if (pureaction == MotionEvent.ACTION_POINTER_DOWN) {
+                            mBaseDist = getDistance(event);
+                            mBaseRatio = ratio;
+                        } else {
+                            float delta = (getDistance(event) - mBaseDist) / STEP;
+                            float multi = (float) Math.pow(2, delta);
+                            ratio = Math.min(1024.0f, Math.max(0.1f, mBaseRatio * multi));
+                            textView.setTextSize(ratio + 13);
+                        }
+                    }
+                    return true;
+                }
+
+                private int getDistance(MotionEvent event) {
+                    int dx = (int) (event.getX(0) - event.getX(1));
+                    int dy = (int) (event.getY(0) - event.getY(1));
+                    return (int) (Math.sqrt(dx * dx + dy * dy));
+                }
+            });
 
             //ToDo: change to setImageDrawable
             imgView.setImageResource(article.getImage());
         }
         return v;
     }
+
 
     // TODO: Rename method, update argument and hook method into UI event
     public void onButtonPressed(Uri uri) {
@@ -98,6 +132,11 @@ public class ArticleFragment extends Fragment {
     public void onDetach() {
         super.onDetach();
         mListener = null;
+    }
+
+    @Override
+    public boolean onTouch(View v, MotionEvent event) {
+        return false;
     }
 
     /**
