@@ -130,7 +130,9 @@ public class MainActivity extends AppCompatActivity implements android.widget.Te
         lv.setAdapter(categoryAdapter);
     }
 
-    public void deleteCategory(MenuItem item) {
+    public void playMusic(MenuItem item) {
+        Intent intent = new Intent(this,PlayerActivity.class);
+        startActivity(intent);
     }
 
     public boolean[] getCurrentCategories(ArrayList<Category> categories){
