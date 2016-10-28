@@ -4,22 +4,22 @@ import android.app.Activity;
 import android.app.DialogFragment;
 import android.content.ContentValues;
 import android.content.Intent;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewTreeObserver;
-import android.widget.CompoundButton;
 import android.widget.ListView;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Random;
 import java.util.Set;
 
 public class MainActivity extends AppCompatActivity implements android.widget.TextView.OnClickListener,
@@ -53,40 +53,61 @@ public class MainActivity extends AppCompatActivity implements android.widget.Te
         mSqLiteDatabase = dbHelper.getWritableDatabase();
         dbHelper.onCreate(mSqLiteDatabase);
         ContentValues values = new ContentValues();
-        values.put(DataBaseHelper.DataBaseEntry.CATEGORY_COLUMN, "test1");
-        values.put(DataBaseHelper.DataBaseEntry.DATE_COLUMN, "1996-10-13");
-        values.put(DataBaseHelper.DataBaseEntry.IMG_COLUMN, R.drawable.rolling_stone);
-        values.put(DataBaseHelper.DataBaseEntry.TEXT_COLUMN, "Some long really interesting article about Rolling Stone. And about dogs. And about good people");
-        values.put(DataBaseHelper.DataBaseEntry.TITLE_COLUMN, "First Article");
-        mSqLiteDatabase.insert(DataBaseHelper.DataBaseEntry.DATABASE_TABLE,null, values);
 
-        values.put(DataBaseHelper.DataBaseEntry.CATEGORY_COLUMN, "test1");
-        values.put(DataBaseHelper.DataBaseEntry.DATE_COLUMN, "1996-10-13");
-        values.put(DataBaseHelper.DataBaseEntry.IMG_COLUMN, R.drawable.apple_ex);
-        values.put(DataBaseHelper.DataBaseEntry.TEXT_COLUMN, "Story about apple. And about dogs. And about good people");
-        values.put(DataBaseHelper.DataBaseEntry.TITLE_COLUMN, "Second Article");
-        mSqLiteDatabase.insert(DataBaseHelper.DataBaseEntry.DATABASE_TABLE,null, values);
+        Random rand = new Random();
+        for (int i = 0; i < 1000; i++){
+
+            String testStr = "";
+            int rand_int = rand.nextInt(100);
+            for (int j = 0; j < rand_int; j++)
+                testStr += "LoL ";
+
+            values.put(DataBaseHelper.DataBaseNewsEntry.CATEGORY_COLUMN, "test1");
+            values.put(DataBaseHelper.DataBaseNewsEntry.DATE_COLUMN, "1996-10-13");
+            values.put(DataBaseHelper.DataBaseNewsEntry.IMG_COLUMN, R.drawable.rolling_stone);
+            values.put(DataBaseHelper.DataBaseNewsEntry.TEXT_COLUMN, testStr);
+            values.put(DataBaseHelper.DataBaseNewsEntry.TITLE_COLUMN, "lol 8");
+            mSqLiteDatabase.insert(DataBaseHelper.DataBaseNewsEntry.DATABASE_TABLE,null, values);
+        }
+        values.put(DataBaseHelper.DataBaseNewsEntry.CATEGORY_COLUMN, "test1");
+        values.put(DataBaseHelper.DataBaseNewsEntry.DATE_COLUMN, "1996-10-13");
+        values.put(DataBaseHelper.DataBaseNewsEntry.IMG_COLUMN, R.drawable.rolling_stone);
+        values.put(DataBaseHelper.DataBaseNewsEntry.TEXT_COLUMN, "Lol lol lol lol lol lol lol lol");
+        values.put(DataBaseHelper.DataBaseNewsEntry.TITLE_COLUMN, "lol 8");
+        mSqLiteDatabase.insert(DataBaseHelper.DataBaseNewsEntry.DATABASE_TABLE,null, values);
+
+        values.put(DataBaseHelper.DataBaseNewsEntry.CATEGORY_COLUMN, "test1");
+        values.put(DataBaseHelper.DataBaseNewsEntry.DATE_COLUMN, "1996-10-13");
+        values.put(DataBaseHelper.DataBaseNewsEntry.IMG_COLUMN, R.drawable.apple_ex);
+        values.put(DataBaseHelper.DataBaseNewsEntry.TEXT_COLUMN, "Lol lol ");
+
+        values.put(DataBaseHelper.DataBaseNewsEntry.TITLE_COLUMN, "lol16");
+        mSqLiteDatabase.insert(DataBaseHelper.DataBaseNewsEntry.DATABASE_TABLE,null, values);
 
 
-        values.put(DataBaseHelper.DataBaseEntry.CATEGORY_COLUMN, "test2");
-        values.put(DataBaseHelper.DataBaseEntry.DATE_COLUMN, "1996-10-13");
-        values.put(DataBaseHelper.DataBaseEntry.IMG_COLUMN, R.drawable.apple_ex);
-        values.put(DataBaseHelper.DataBaseEntry.TEXT_COLUMN, "Story about apple. And about dogs. And about good people");
-        values.put(DataBaseHelper.DataBaseEntry.TITLE_COLUMN, "Article for test2");
-        mSqLiteDatabase.insert(DataBaseHelper.DataBaseEntry.DATABASE_TABLE,null, values);
+        values.put(DataBaseHelper.DataBaseNewsEntry.CATEGORY_COLUMN, "test1");
+        values.put(DataBaseHelper.DataBaseNewsEntry.DATE_COLUMN, "1996-10-13");
+        values.put(DataBaseHelper.DataBaseNewsEntry.IMG_COLUMN, R.drawable.apple_ex);
+        values.put(DataBaseHelper.DataBaseNewsEntry.TEXT_COLUMN, "Lol lol lol lol lol lol lol lol Lol lol lol lol lol lol lol lol Lol lol lol lol lol lol lol lol Lol lol lol lol lol lol lol lol");
+        values.put(DataBaseHelper.DataBaseNewsEntry.TITLE_COLUMN, "lol32");
+        mSqLiteDatabase.insert(DataBaseHelper.DataBaseNewsEntry.DATABASE_TABLE,null, values);
 
-        values.put(DataBaseHelper.DataBaseEntry.CATEGORY_COLUMN, "test1");
-        values.put(DataBaseHelper.DataBaseEntry.DATE_COLUMN, "1996-10-13");
-        values.put(DataBaseHelper.DataBaseEntry.IMG_COLUMN, R.drawable.apple_ex);
-        values.put(DataBaseHelper.DataBaseEntry.TEXT_COLUMN, "Story about apple. And about dogs. And about good people");
-        values.put(DataBaseHelper.DataBaseEntry.TITLE_COLUMN, "Third article");
-        mSqLiteDatabase.insert(DataBaseHelper.DataBaseEntry.DATABASE_TABLE,null, values);
+        values.put(DataBaseHelper.DataBaseNewsEntry.CATEGORY_COLUMN, "test1");
+        values.put(DataBaseHelper.DataBaseNewsEntry.DATE_COLUMN, "1996-10-13");
+        values.put(DataBaseHelper.DataBaseNewsEntry.IMG_COLUMN, R.drawable.apple_ex);
+        values.put(DataBaseHelper.DataBaseNewsEntry.TEXT_COLUMN, "Story about apple. And about dogs. And about good people");
+        values.put(DataBaseHelper.DataBaseNewsEntry.TITLE_COLUMN, "Third article");
+        mSqLiteDatabase.insert(DataBaseHelper.DataBaseNewsEntry.DATABASE_TABLE,null, values);
         addDial= new AddCategoryDialog();
-
+        dbHelper.close();
         this.app = (Breaking_News)this.getApplication();
+
+        ReadRss readRss = new ReadRss(this);
+        readRss.execute();
 
         catListView = (ListView) findViewById(R.id.listview);
         showCatList();
+
     }
 
 
@@ -121,6 +142,29 @@ public class MainActivity extends AppCompatActivity implements android.widget.Te
         app.catList = values;
         categoryAdapter.UpdateCategoryList(values);
     }
+    private Cursor getCursorForCategories(){
+        dbHelper = new DataBaseHelper(this);
+        mSqLiteDatabase = dbHelper.getReadableDatabase();
+        String[] s = new String[]{DataBaseHelper.DataBaseCategoriesEntry.CATEGORY_COLUMN};
+        return mSqLiteDatabase.query(DataBaseHelper.DataBaseCategoriesEntry.DATABASE_TABLE, s, null, null, null, null, null);
+    }
+
+    private CharSequence[] getCategories(){
+        Cursor c = getCursorForCategories();
+        c.moveToFirst();
+        HashSet<String> categoriesSet = new HashSet<>();
+        String[] words;
+        while (!c.isAfterLast() && !c.isBeforeFirst()){
+            String categories = c.getString(c.getColumnIndex(DataBaseHelper.DataBaseCategoriesEntry.CATEGORY_COLUMN));
+            words = categories.split(",");
+            for (String word : words){
+                categoriesSet.add(word.trim());
+            }
+            c.moveToNext();
+        }
+        CharSequence[] result = categoriesSet.toArray(new CharSequence[categoriesSet.size()]);
+        return result;
+    }
 
     private void showCatList() {
         //app.catList = new ArrayList<>();
@@ -151,9 +195,12 @@ public class MainActivity extends AppCompatActivity implements android.widget.Te
 
         return currentCategories;
     }
-
     public void categoriesMenu(MenuItem item) {
         Bundle b = new Bundle();
+
+
+        app.posibleCategories = getCategories();
+
         b.putCharSequenceArray("categories",app.posibleCategories);
         b.putBooleanArray("currentCategories", getCurrentCategories(app.catList));
         addDial.setArguments(b);

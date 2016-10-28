@@ -104,7 +104,7 @@ public class ArticleFragment extends Fragment implements View.OnTouchListener {
             });
 
             //ToDo: change to setImageDrawable
-            imgView.setImageResource(article.getImage());
+//            imgView.setImageResource(article.getImage());
         }
         return v;
     }

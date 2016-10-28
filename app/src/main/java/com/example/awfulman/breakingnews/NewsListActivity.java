@@ -1,11 +1,12 @@
 package com.example.awfulman.breakingnews;
 
+import java.util.Collections;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.database.Cursor;
 import android.net.Uri;
-import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
@@ -13,15 +14,20 @@ import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v4.widget.SimpleCursorAdapter;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.MotionEvent;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 
 public class NewsListActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> , ArticleFragment.OnFragmentInteractionListener{
 
@@ -36,6 +42,15 @@ public class NewsListActivity extends AppCompatActivity implements LoaderManager
     private int positionInArray;
     private boolean landscapeOrientation = false;
     SimpleCursorAdapter scAdapter;
+
+    final int MENU_SORT_JAVA = 0;
+    final int MENU_SORT_NDK = 1;
+
+    static {
+        System.loadLibrary("sort");
+    }
+
+    public native int[] sort(int[] freqs, int size);
 
     private void setLastTitle(String title){
         Intent data = new Intent();
@@ -79,8 +94,8 @@ public class NewsListActivity extends AppCompatActivity implements LoaderManager
         db = new NewsDB(this);
         db.open(category);
 
-        String[] from = new String[] {DataBaseHelper.DataBaseEntry.IMG_COLUMN,
-                DataBaseHelper.DataBaseEntry.TITLE_COLUMN, DataBaseHelper.DataBaseEntry.TEXT_COLUMN};
+        String[] from = new String[] {DataBaseHelper.DataBaseNewsEntry.IMG_COLUMN,
+                DataBaseHelper.DataBaseNewsEntry.TITLE_COLUMN, DataBaseHelper.DataBaseNewsEntry.TEXT_COLUMN};
         int[] to = new int[] { R.id.image, R.id.title, R.id.text };
 
         scAdapter = new SimpleCursorAdapter(this, R.layout.article_single_list_item, null, from, to, 0);
@@ -104,9 +119,122 @@ public class NewsListActivity extends AppCompatActivity implements LoaderManager
 
             }
         });
+        newsData.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+                Cursor cursor = scAdapter.getCursor();
+                cursor.moveToPosition(position);
+                int id_del = cursor.getInt(cursor.getColumnIndex(DataBaseHelper.DataBaseNewsEntry._ID));
+                db.delete_by_id(id_del);
+                scAdapter.changeCursor(db.getDataByCategory());
+                scAdapter.notifyDataSetChanged();
+                return true;
+            }
+        });
         getSupportLoaderManager().initLoader(0, null, this);
     }
 
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        menu.add(0,MENU_SORT_JAVA,0, "Java sort");
+        menu.add(0,MENU_SORT_NDK,0, "NDK sort");
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item){
+        switch (item.getItemId()){
+            case MENU_SORT_JAVA:
+                sortWith(MENU_SORT_JAVA);
+                break;
+            case MENU_SORT_NDK:
+                sortWith(MENU_SORT_NDK);
+                break;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    private Integer getWordFrequency(String word, String text){
+        word = word.toLowerCase();
+        text = text.toLowerCase();
+        int count = 0;
+        int i = text.indexOf(word);
+        while (i >= 0){
+            count++;
+            i = text.indexOf(word, i + 1);
+        }
+        return count;
+    }
+
+    private ArrayList<Integer> prepareFrequencyArray(String word, Cursor cursor){
+        Article article;
+        ArrayList<Integer> wordFrequencies = new ArrayList<>();
+        cursor.moveToFirst();
+        while (!cursor.isAfterLast()){
+            article = getArticleFromCursor(cursor);
+            wordFrequencies.add(getWordFrequency(word, article.getText()));
+            cursor.moveToNext();
+        }
+        return wordFrequencies;
+    }
+
+    private void sortWith(final int sortType){
+        AlertDialog.Builder alert = new AlertDialog.Builder(this);
+        alert.setTitle("Sort by word frequency:");
+
+        final EditText input = new EditText(this);
+        alert.setView(input);
+
+        alert.setPositiveButton("Sort", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int btnID) {
+                String word = input.getText().toString();
+                if (word.isEmpty()) {
+                    Toast.makeText(getApplicationContext(),
+                            "Word can't be empty!",
+                            Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                Cursor cursor = scAdapter.getCursor();
+                ArrayList<Integer> freqArray = prepareFrequencyArray(word, cursor);
+                int[] freqs = new int[freqArray.size()];
+                int[] freqs_res = new int[freqArray.size()];
+                int i = 0;
+
+                for(Integer freq:freqArray)
+                    freqs[i++] = freq;
+                long time = 0;
+
+                if (sortType == MENU_SORT_NDK){
+                    time = System.nanoTime();
+                    freqs_res = sort(freqs, freqArray.size());
+                    time = System.nanoTime() - time;
+                    Log.d("Sorting", "---------------------------------");
+                    for(int j = 0; j < freqArray.size(); j++)
+                        Log.d("Sorting", Integer.toString(freqs_res[j]));
+                    Log.d("Sorting", "" + time);
+
+                }
+                if(sortType == MENU_SORT_JAVA){
+                    time = System.nanoTime();
+                    Collections.sort(freqArray);
+                    time = System.nanoTime() - time;
+                    Log.d("Sorting", "---------------------------------");
+                    for(int j = 0; j < freqArray.size(); j++)
+                        Log.d("Sorting", Integer.toString(freqArray.get(j)));
+                    Log.d("Sorting", "" + time);
+
+                }
+
+                Toast.makeText(getApplicationContext(), "Gone " + time + " ms",Toast.LENGTH_SHORT).show();
+
+
+
+            }
+        });
+        alert.show();
+
+    }
 
     private ArrayList<Article> getArticles(Cursor cursor) {
         //ToDo: handle case when clicked last article
@@ -154,10 +282,10 @@ public class NewsListActivity extends AppCompatActivity implements LoaderManager
     }
 
     private Article getArticleFromCursor(Cursor cursor){
-        int img = cursor.getInt(cursor.getColumnIndex(DataBaseHelper.DataBaseEntry.IMG_COLUMN));
-        last_title = cursor.getString(cursor.getColumnIndex(DataBaseHelper.DataBaseEntry.TITLE_COLUMN));
-        String txt = cursor.getString(cursor.getColumnIndex(DataBaseHelper.DataBaseEntry.TEXT_COLUMN));
-        String date = cursor.getString(cursor.getColumnIndex(DataBaseHelper.DataBaseEntry.DATE_COLUMN));
+        String img = cursor.getString(cursor.getColumnIndex(DataBaseHelper.DataBaseNewsEntry.IMG_COLUMN));
+        last_title = cursor.getString(cursor.getColumnIndex(DataBaseHelper.DataBaseNewsEntry.TITLE_COLUMN));
+        String txt = cursor.getString(cursor.getColumnIndex(DataBaseHelper.DataBaseNewsEntry.TEXT_COLUMN));
+        String date = cursor.getString(cursor.getColumnIndex(DataBaseHelper.DataBaseNewsEntry.DATE_COLUMN));
         return new Article(img, last_title, txt, date);
     }
 

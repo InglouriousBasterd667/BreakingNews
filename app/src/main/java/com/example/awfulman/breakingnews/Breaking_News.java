@@ -15,6 +15,7 @@ public class Breaking_News extends Application{
     public Breaking_News(){
         super();
         catList = new ArrayList<>();
+        catList.add(new Category("All"));
    //     catList.add(new Category("test1"));
 //        catList.add(new Category("test2"));
         posibleCategories = new CharSequence[]{"test1","test2"};

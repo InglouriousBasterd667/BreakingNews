@@ -11,13 +11,13 @@ import java.io.Serializable;
 
 public class Article implements Parcelable{
 
-    private int image;
+    private String image;
     private String title;
     private String text;
     private String date;
 
     protected Article(Parcel in) {
-        image = in.readInt();
+        image = in.readString();
         title = in.readString();
         text = in.readString();
         date = in.readString();
@@ -39,7 +39,7 @@ public class Article implements Parcelable{
         return date;
     }
 
-    public Article(int image, String title, String text, String date) {
+    public Article(String image, String title, String text, String date) {
         this.image = image;
         this.title = title;
         this.text = text;
@@ -50,7 +50,7 @@ public class Article implements Parcelable{
         return title;
     }
 
-    public int getImage() {
+    public String getImage() {
         return image;
     }
 
@@ -65,7 +65,7 @@ public class Article implements Parcelable{
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeInt(image);
+        dest.writeString(image);
         dest.writeString(title);
         dest.writeString(text);
         dest.writeString(date);

@@ -1,10 +1,14 @@
 package com.example.awfulman.breakingnews;
 
 import android.app.ListActivity;
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
+import android.content.ServiceConnection;
 import android.database.Cursor;
 import android.media.MediaPlayer;
 import android.os.Handler;
+import android.os.IBinder;
 import android.provider.MediaStore;
 import android.os.Bundle;
 import android.util.Log;
@@ -32,11 +36,12 @@ public class PlayerActivity extends ListActivity {
     private ImageButton playButton;
     private ImageButton prevButton;
     private ImageButton nextButton;
-
+    private Intent intent;
+    private ServiceConnection serviceConnection;
     private boolean isStarted = true;
     private String currentFile = "";
     private boolean isMovingSeekBar = false;
-
+    private PlayService service;
     private final Handler handler = new Handler();
 
     private final Runnable updatePositionRunnable = new Runnable() {
@@ -48,6 +53,21 @@ public class PlayerActivity extends ListActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        intent = new Intent(this, PlayService.class);
+        serviceConnection = new ServiceConnection() {
+            @Override
+            public void onServiceConnected(ComponentName name, IBinder iBinder) {
+               service = ((PlayService.AudioPlayBinder)iBinder).getService();
+            }
+
+            @Override
+            public void onServiceDisconnected(ComponentName name) {
+
+            }
+        };
+        bindService(intent,serviceConnection,0);
+        startService(intent);
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_player);
 
@@ -65,7 +85,7 @@ public class PlayerActivity extends ListActivity {
 
         Cursor cursor = getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, null, null, null, null);
 
-        if (null != cursor) {
+        if (cursor != null) {
             cursor.moveToFirst();
 
             mediaAdapter = new MediaCursorAdapter(this, R.layout.listitem, cursor);
@@ -103,6 +123,9 @@ public class PlayerActivity extends ListActivity {
     private void startPlay(String file) {
         Log.i("Selected: ", file);
 
+
+//        service.pauseOrResume();
+
         selectedFile.setText(file);
         seekbar.setProgress(0);
 
@@ -125,7 +148,6 @@ public class PlayerActivity extends ListActivity {
         playButton.setImageResource(android.R.drawable.ic_media_pause);
 
         updatePosition();
-
         isStarted = true;
     }
 
@@ -247,7 +269,6 @@ public class PlayerActivity extends ListActivity {
 
         @Override
         public boolean onError(MediaPlayer mp, int what, int extra) {
-
             return false;
         }
     };
@@ -261,6 +282,11 @@ public class PlayerActivity extends ListActivity {
         @Override
         public void onStartTrackingTouch(SeekBar seekBar) {
             isMovingSeekBar = true;
+            if (false){
+                service.play();
+                service.pauseOrResume();
+                service.stop();
+            }
         }
 
         @Override

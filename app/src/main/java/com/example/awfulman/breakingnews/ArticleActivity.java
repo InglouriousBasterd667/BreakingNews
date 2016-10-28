@@ -12,6 +12,8 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.squareup.picasso.Picasso;
+
 import java.util.ArrayList;
 
 public class ArticleActivity extends AppCompatActivity implements OnTouchListener, ArticleFragment.OnFragmentInteractionListener {
@@ -87,9 +89,9 @@ public class ArticleActivity extends AppCompatActivity implements OnTouchListene
 
     private void fillArticle(int position) {
         Article article = articles.get(position);
-        imgView.setImageResource(article.getImage());
         titleView.setText(article.getTitle());
         txtView.setText(article.getText());
+        Picasso.with(this).load(article.getImage()).into(imgView);
     }
 
     @Override

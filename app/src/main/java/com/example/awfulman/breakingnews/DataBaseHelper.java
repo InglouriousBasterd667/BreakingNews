@@ -1,6 +1,7 @@
 package com.example.awfulman.breakingnews;
 
 import android.content.Context;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.provider.BaseColumns;
@@ -16,7 +17,7 @@ public class DataBaseHelper extends SQLiteOpenHelper{
     private static final String DATABASE_NAME = "news.db";
     private static final int DATABASE_VERSION = 1;
 
-    public static abstract class DataBaseEntry implements BaseColumns{
+    public static abstract class DataBaseNewsEntry implements BaseColumns{
         public static final String DATABASE_TABLE = "news";
         public static final String CATEGORY_COLUMN = "category";
         public static final String IMG_COLUMN = "image";
@@ -25,30 +26,44 @@ public class DataBaseHelper extends SQLiteOpenHelper{
         public static final String DATE_COLUMN = "data";
     }
 
-    public DataBaseHelper(Context context) {
-        super(context, DATABASE_NAME, null, DATABASE_VERSION);
+    public static abstract class DataBaseCategoriesEntry implements BaseColumns{
+        public static final String DATABASE_TABLE = "categories";
+        public static final String CATEGORY_COLUMN = "category";
     }
 
-    private static final String DATABASE_CREATE_SCRIPT = "create table "
-            + DataBaseEntry.DATABASE_TABLE + " (" + DataBaseEntry._ID
-            + " integer primary key autoincrement, " + DataBaseEntry.CATEGORY_COLUMN
-            + " text not null, " + DataBaseEntry.IMG_COLUMN + " integer, " + DataBaseEntry.TITLE_COLUMN + " text, " + DataBaseEntry.TEXT_COLUMN + " text, "
-            + DataBaseEntry.DATE_COLUMN + " text);";
+    public DataBaseHelper(Context context) {
+        super(context, DATABASE_NAME, null, DATABASE_VERSION);
+
+
+    }
+
+
+
+    private static final String DATABASE_NEWS_CREATE_SCRIPT = "create table if not exists "
+            + DataBaseNewsEntry.DATABASE_TABLE + " (" + DataBaseNewsEntry._ID
+            + " integer primary key autoincrement, " + DataBaseNewsEntry.CATEGORY_COLUMN
+            + " text not null, " + DataBaseNewsEntry.IMG_COLUMN + " text, " + DataBaseNewsEntry.TITLE_COLUMN + " text, " + DataBaseNewsEntry.TEXT_COLUMN + " text, "
+            + DataBaseNewsEntry.DATE_COLUMN + " text);";
+
+    private static final String DATABASE_CATEGORIES_CREATE_SCRIPT = "create table if not exists "
+            + DataBaseCategoriesEntry.DATABASE_TABLE + " (" + DataBaseCategoriesEntry._ID
+            + " integer primary key autoincrement, " + DataBaseCategoriesEntry.CATEGORY_COLUMN + " text);";
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        db.execSQL("DROP TABLE IF EXISTS " + DataBaseEntry.DATABASE_TABLE);
-        db.execSQL(DATABASE_CREATE_SCRIPT);
+            db.execSQL("DROP TABLE IF EXISTS " + DataBaseNewsEntry.DATABASE_TABLE);
+            db.execSQL(DATABASE_NEWS_CREATE_SCRIPT);
+
+            db.execSQL("DROP TABLE IF EXISTS " + DataBaseCategoriesEntry.DATABASE_TABLE);
+            db.execSQL(DATABASE_CATEGORIES_CREATE_SCRIPT);
+
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        // Запишем в журнал
         Log.w("SQLite", "Обновляемся с версии " + oldVersion + " на версию " + newVersion);
 
-        // Удаляем старую таблицу и создаём новую
-        db.execSQL("DROP TABLE IF IT EXISTS " + DataBaseEntry.DATABASE_TABLE);
-        // Создаём новую таблицу
+        db.execSQL("DROP TABLE IF IT EXISTS " + DataBaseNewsEntry.DATABASE_TABLE);
         onCreate(db);
     }
 }
